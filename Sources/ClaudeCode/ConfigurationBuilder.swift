@@ -12,7 +12,7 @@ import Foundation
 ///     .build()
 /// ```
 public struct ClaudeConfigurationBuilder {
-    private var configuration = ClaudeConfiguration()
+    fileprivate var configuration = ClaudeConfiguration()
 
     public init() {}
 

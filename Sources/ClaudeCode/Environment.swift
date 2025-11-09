@@ -228,7 +228,7 @@ public struct ClaudeEnvironment: Sendable {
 
 /// A builder for creating ClaudeEnvironment instances with a fluent API
 public struct ClaudeEnvironmentBuilder {
-    private var environment = ClaudeEnvironment()
+    fileprivate var environment = ClaudeEnvironment()
 
     public init() {}
 

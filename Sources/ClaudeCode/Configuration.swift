@@ -3,7 +3,7 @@ import Foundation
 /// Configuration options for Claude Code CLI execution
 public struct ClaudeConfiguration: Sendable {
     /// The model to use for execution
-    public enum Model: String, Sendable {
+    public enum Model: Sendable, Equatable {
         case sonnet
         case opus
         case haiku

@@ -1,6 +1,12 @@
 import Foundation
 import Subprocess
 
+#if canImport(System)
+import System
+#else
+import SystemPackage
+#endif
+
 /// A Swift wrapper for the Claude Code CLI
 ///
 /// This class provides a type-safe, Swift-native interface for interacting with
@@ -173,36 +179,36 @@ public actor ClaudeCode {
         workingDirectory: String? = nil
     ) async throws -> ClaudeResult {
         do {
-            // Build the executable configuration
-            var executable = Executable.named(executablePath)
-
-            // Configure arguments
-            let args = ExecutionInput.arguments(arguments)
-
             // Configure environment
-            let environmentInput: ExecutionInput.Environment
+            let environmentInput: Environment
             if let customEnv = self.environment {
-                environmentInput = .custom(customEnv.mergeWithInheritedEnvironment())
+                let envDict = customEnv.mergeWithInheritedEnvironment()
+                let convertedDict: [Environment.Key: String] = Dictionary(
+                    uniqueKeysWithValues: envDict.map { (Environment.Key(stringLiteral: $0.key), $0.value) }
+                )
+                environmentInput = .custom(convertedDict)
             } else {
                 environmentInput = .inherit
             }
 
             // Configure working directory if provided
-            var workingDir: ExecutionInput.WorkingDirectory = .inherit
-            if let workingDirectory = workingDirectory {
-                workingDir = .path(workingDirectory)
-            }
+            let workingDir: FilePath? = workingDirectory.map { FilePath($0) }
+
+            // Create configuration
+            let config = Configuration(
+                executable: .path(FilePath(executablePath)),
+                arguments: Arguments(arguments),
+                environment: environmentInput,
+                workingDirectory: workingDir
+            )
 
             // Run the process and collect output
-            let result: CollectedResult<String, String>
+            let result: CollectedResult<StringOutput<UTF8>, StringOutput<UTF8>>
 
             if let input = input {
                 // Execute with input
                 result = try await run(
-                    executable,
-                    args,
-                    environmentInput,
-                    workingDir,
+                    config,
                     input: .string(input),
                     output: .string(limit: 10_000_000), // 10MB limit
                     error: .string(limit: 1_000_000)     // 1MB limit
@@ -210,10 +216,7 @@ public actor ClaudeCode {
             } else {
                 // Execute without input
                 result = try await run(
-                    executable,
-                    args,
-                    environmentInput,
-                    workingDir,
+                    config,
                     output: .string(limit: 10_000_000), // 10MB limit
                     error: .string(limit: 1_000_000)     // 1MB limit
                 )
@@ -222,18 +225,16 @@ public actor ClaudeCode {
             // Extract exit code
             let exitCode: Int32
             switch result.terminationStatus {
-            case .exit(let code):
+            case .exited(let code):
                 exitCode = code
-            case .signal(let signal):
-                throw ClaudeCodeError.terminated
-            case .abnormal:
+            case .unhandledException(_):
                 throw ClaudeCodeError.terminated
             }
 
             return ClaudeResult(
                 exitCode: exitCode,
-                output: result.standardOutput,
-                error: result.standardError
+                output: result.standardOutput ?? "",
+                error: result.standardError ?? ""
             )
 
         } catch let error as ClaudeCodeError {

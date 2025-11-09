@@ -19,7 +19,7 @@ extension ClaudeCode {
         inputFile: String,
         configuration: ClaudeConfiguration? = nil
     ) async throws -> ClaudeResult {
-        let fileContent = try String(contentsOfFile: inputFile)
+        let fileContent = try String(contentsOfFile: inputFile, encoding: .utf8)
         return try await execute(
             prompt: prompt,
             input: fileContent,
