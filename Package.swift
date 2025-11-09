@@ -18,7 +18,7 @@ let package = Package(
             targets: ["ClaudeCode"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/swiftlang/swift-subprocess.git", from: "1.0.0")
+        .package(url: "https://github.com/swiftlang/swift-subprocess.git", from: "0.2.1")
     ],
     targets: [
         .target(
