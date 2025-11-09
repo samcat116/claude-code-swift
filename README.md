@@ -1,5 +1,10 @@
 # ClaudeCode
 
+[![CI](https://github.com/samcat116/claude-code-swift/actions/workflows/ci.yml/badge.svg)](https://github.com/samcat116/claude-code-swift/actions/workflows/ci.yml)
+[![Swift 6.0](https://img.shields.io/badge/Swift-6.0-orange.svg)](https://swift.org)
+[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/samcat116/claude-code-swift)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 A Swift package providing a type-safe, Swift-native interface for interacting with the [Claude Code CLI](https://claude.com/code). Built on top of the official [swift-subprocess](https://github.com/swiftlang/swift-subprocess) library for robust process management.
 
 ## Features

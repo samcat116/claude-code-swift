@@ -1,0 +1,72 @@
+# SwiftLint Configuration
+
+# Paths to exclude from linting
+excluded:
+  - .build
+  - .swiftpm
+  - Package.swift
+  - Tests/LinuxMain.swift
+
+# Rules to enable
+opt_in_rules:
+  - empty_count
+  - empty_string
+  - explicit_init
+  - first_where
+  - sorted_first_last
+  - contains_over_first_not_nil
+  - last_where
+  - reduce_into
+  - closure_spacing
+  - literal_expression_end_indentation
+  - modifier_order
+  - redundant_nil_coalescing
+  - toggle_bool
+  - vertical_parameter_alignment_on_call
+
+# Rules to disable
+disabled_rules:
+  - trailing_comma
+
+# Configuration for specific rules
+line_length:
+  warning: 120
+  error: 200
+  ignores_comments: true
+  ignores_urls: true
+
+file_length:
+  warning: 600
+  error: 1000
+
+function_body_length:
+  warning: 50
+  error: 100
+
+type_body_length:
+  warning: 300
+  error: 500
+
+identifier_name:
+  min_length:
+    warning: 2
+    error: 1
+  max_length:
+    warning: 50
+    error: 100
+  excluded:
+    - id
+    - i
+    - j
+    - x
+    - y
+    - z
+
+# Severity overrides
+force_cast: warning
+force_try: warning
+
+# Included paths
+included:
+  - Sources
+  - Tests
