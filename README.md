@@ -7,8 +7,9 @@ A Swift package providing a type-safe, Swift-native interface for interacting wi
 - 🚀 **Type-safe API** - Compile-time safety for all CLI options and flags
 - 🔄 **Async/await** - Modern Swift concurrency support
 - 🛠 **Fluent builders** - Convenient configuration building with method chaining
+- 🌍 **Environment variables** - Full support for Claude Code environment variables
 - 📦 **Zero dependencies** (except swift-subprocess)
-- ✅ **Comprehensive** - Supports all Claude Code CLI features
+- ✅ **Comprehensive** - Supports all Claude Code CLI features and environment settings
 - 🎯 **Convenience methods** - Helper functions for common use cases
 
 ## Requirements
@@ -115,6 +116,40 @@ let result = try await claude.executeWithFile(
     inputFile: "/path/to/code.swift"
 )
 ```
+
+### Environment Variables
+
+Configure Claude Code behavior using environment variables:
+
+```swift
+// Create environment configuration
+let env = ClaudeEnvironment.builder
+    .apiKey("your-api-key")
+    .model("claude-sonnet-4")
+    .disableTelemetry()
+    .bashDefaultTimeout(60000)  // 60 seconds
+    .maxThinkingTokens(10000)
+    .build()
+
+// Create Claude instance with environment
+let claude = ClaudeCode(environment: env)
+
+// Or use specific configurations for proxy
+let proxyEnv = ClaudeEnvironment.builder
+    .httpsProxy("http://proxy.example.com:8080")
+    .noProxy("localhost,127.0.0.1")
+    .build()
+
+let claude = ClaudeCode(environment: proxyEnv)
+```
+
+Available environment options:
+- **Authentication**: `apiKey`, `authToken`, `customHeaders`
+- **Models**: `model`, `defaultSonnetModel`, `defaultOpusModel`, `defaultHaikuModel`, `subagentModel`
+- **Bash Execution**: `bashDefaultTimeout`, `bashMaxOutputLength`, `bashMaxTimeout`
+- **Feature Toggles**: `disableTelemetry`, `disableErrorReporting`, `disableAutoUpdater`, `disablePromptCaching`
+- **Extended Thinking**: `maxThinkingTokens` for complex reasoning tasks
+- **Network**: `httpProxy`, `httpsProxy`, `noProxy`
 
 ### Session Management
 
@@ -280,6 +315,45 @@ Configuration options for Claude Code execution.
 #### Builder Pattern
 
 Use `ClaudeConfiguration.builder` to create configurations with a fluent API.
+
+### ClaudeEnvironment
+
+Environment variable configuration for Claude Code.
+
+#### Properties
+
+**Authentication & API:**
+- `apiKey: String?` - API key (ANTHROPIC_API_KEY)
+- `authToken: String?` - Custom authorization token (ANTHROPIC_AUTH_TOKEN)
+- `customHeaders: String?` - Custom request headers as JSON (ANTHROPIC_CUSTOM_HEADERS)
+
+**Model Configuration:**
+- `model: String?` - Default model to use (ANTHROPIC_MODEL)
+- `defaultHaikuModel: String?` - Haiku model version (ANTHROPIC_DEFAULT_HAIKU_MODEL)
+- `defaultOpusModel: String?` - Opus model version (ANTHROPIC_DEFAULT_OPUS_MODEL)
+- `defaultSonnetModel: String?` - Sonnet model version (ANTHROPIC_DEFAULT_SONNET_MODEL)
+- `subagentModel: String?` - Model for subagents (CLAUDE_CODE_SUBAGENT_MODEL)
+
+**Bash Execution:**
+- `bashDefaultTimeout: Int?` - Default timeout in ms (BASH_DEFAULT_TIMEOUT_MS)
+- `bashMaxOutputLength: Int?` - Max output characters (BASH_MAX_OUTPUT_LENGTH)
+- `bashMaxTimeout: Int?` - Maximum timeout in ms (BASH_MAX_TIMEOUT_MS)
+
+**Feature Controls:**
+- `disableTelemetry: Bool` - Disable telemetry (DISABLE_TELEMETRY)
+- `disableErrorReporting: Bool` - Disable error reporting (DISABLE_ERROR_REPORTING)
+- `disableAutoUpdater: Bool` - Disable auto-updates (DISABLE_AUTOUPDATER)
+- `disablePromptCaching: Bool` - Disable prompt caching (DISABLE_PROMPT_CACHING)
+- `maxThinkingTokens: Int?` - Extended thinking tokens (MAX_THINKING_TOKENS)
+
+**Network:**
+- `httpProxy: String?` - HTTP proxy URL (HTTP_PROXY)
+- `httpsProxy: String?` - HTTPS proxy URL (HTTPS_PROXY)
+- `noProxy: String?` - Hosts to bypass proxy (NO_PROXY)
+
+#### Builder Pattern
+
+Use `ClaudeEnvironment.builder` to create environment configurations with a fluent API.
 
 ### ClaudeResult
 

@@ -33,18 +33,24 @@ public actor ClaudeCode {
     /// Default configuration to use
     private var defaultConfiguration: ClaudeConfiguration
 
+    /// Environment configuration to use
+    private var environment: ClaudeEnvironment?
+
     // MARK: - Initialization
 
     /// Creates a new Claude Code wrapper
     /// - Parameters:
     ///   - executablePath: Path to the claude executable. If nil, searches in PATH.
     ///   - defaultConfiguration: Default configuration to use for all executions
+    ///   - environment: Optional environment configuration for Claude Code
     public init(
         executablePath: String? = nil,
-        defaultConfiguration: ClaudeConfiguration = ClaudeConfiguration()
+        defaultConfiguration: ClaudeConfiguration = ClaudeConfiguration(),
+        environment: ClaudeEnvironment? = nil
     ) {
         self.executablePath = executablePath ?? "claude"
         self.defaultConfiguration = defaultConfiguration
+        self.environment = environment
     }
 
     // MARK: - Public Methods
@@ -173,9 +179,15 @@ public actor ClaudeCode {
             // Configure arguments
             let args = ExecutionInput.arguments(arguments)
 
-            // Configure working directory if provided
-            let environment = ExecutionInput.environment(.inherit)
+            // Configure environment
+            let environmentInput: ExecutionInput.Environment
+            if let customEnv = self.environment {
+                environmentInput = .custom(customEnv.mergeWithInheritedEnvironment())
+            } else {
+                environmentInput = .inherit
+            }
 
+            // Configure working directory if provided
             var workingDir: ExecutionInput.WorkingDirectory = .inherit
             if let workingDirectory = workingDirectory {
                 workingDir = .path(workingDirectory)
@@ -189,7 +201,7 @@ public actor ClaudeCode {
                 result = try await run(
                     executable,
                     args,
-                    environment,
+                    environmentInput,
                     workingDir,
                     input: .string(input),
                     output: .string(limit: 10_000_000), // 10MB limit
@@ -200,7 +212,7 @@ public actor ClaudeCode {
                 result = try await run(
                     executable,
                     args,
-                    environment,
+                    environmentInput,
                     workingDir,
                     output: .string(limit: 10_000_000), // 10MB limit
                     error: .string(limit: 1_000_000)     // 1MB limit

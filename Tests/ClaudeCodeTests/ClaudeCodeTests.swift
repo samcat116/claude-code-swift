@@ -173,6 +173,140 @@ struct ModelTests {
     }
 }
 
+@Suite("ClaudeEnvironment Tests")
+struct ClaudeEnvironmentTests {
+
+    @Test("Environment builds variables correctly")
+    func testBasicEnvironmentBuilding() {
+        let env = ClaudeEnvironment(
+            apiKey: "test-key",
+            model: "claude-sonnet-4",
+            disableTelemetry: true
+        )
+
+        let vars = env.buildEnvironment()
+
+        #expect(vars["ANTHROPIC_API_KEY"] == "test-key")
+        #expect(vars["ANTHROPIC_MODEL"] == "claude-sonnet-4")
+        #expect(vars["DISABLE_TELEMETRY"] == "1")
+    }
+
+    @Test("Environment builder pattern works correctly")
+    func testEnvironmentBuilder() {
+        let env = ClaudeEnvironment.builder
+            .apiKey("my-key")
+            .model("claude-opus-4")
+            .disableTelemetry()
+            .bashDefaultTimeout(60000)
+            .maxThinkingTokens(10000)
+            .build()
+
+        #expect(env.apiKey == "my-key")
+        #expect(env.model == "claude-opus-4")
+        #expect(env.disableTelemetry == true)
+        #expect(env.bashDefaultTimeout == 60000)
+        #expect(env.maxThinkingTokens == 10000)
+    }
+
+    @Test("Proxy configuration")
+    func testProxyConfiguration() {
+        let env = ClaudeEnvironment.builder
+            .httpProxy("http://proxy.example.com:8080")
+            .httpsProxy("https://proxy.example.com:8443")
+            .noProxy("localhost,127.0.0.1")
+            .build()
+
+        let vars = env.buildEnvironment()
+
+        #expect(vars["HTTP_PROXY"] == "http://proxy.example.com:8080")
+        #expect(vars["HTTPS_PROXY"] == "https://proxy.example.com:8443")
+        #expect(vars["NO_PROXY"] == "localhost,127.0.0.1")
+    }
+
+    @Test("Model defaults configuration")
+    func testModelDefaults() {
+        let env = ClaudeEnvironment.builder
+            .defaultSonnetModel("claude-sonnet-4-20250514")
+            .defaultOpusModel("claude-opus-4-20250514")
+            .defaultHaikuModel("claude-haiku-4-20250514")
+            .subagentModel("claude-haiku-4")
+            .build()
+
+        let vars = env.buildEnvironment()
+
+        #expect(vars["ANTHROPIC_DEFAULT_SONNET_MODEL"] == "claude-sonnet-4-20250514")
+        #expect(vars["ANTHROPIC_DEFAULT_OPUS_MODEL"] == "claude-opus-4-20250514")
+        #expect(vars["ANTHROPIC_DEFAULT_HAIKU_MODEL"] == "claude-haiku-4-20250514")
+        #expect(vars["CLAUDE_CODE_SUBAGENT_MODEL"] == "claude-haiku-4")
+    }
+
+    @Test("Bash execution configuration")
+    func testBashConfiguration() {
+        let env = ClaudeEnvironment.builder
+            .bashDefaultTimeout(30000)
+            .bashMaxOutputLength(100000)
+            .bashMaxTimeout(120000)
+            .build()
+
+        let vars = env.buildEnvironment()
+
+        #expect(vars["BASH_DEFAULT_TIMEOUT_MS"] == "30000")
+        #expect(vars["BASH_MAX_OUTPUT_LENGTH"] == "100000")
+        #expect(vars["BASH_MAX_TIMEOUT_MS"] == "120000")
+    }
+
+    @Test("Feature toggles configuration")
+    func testFeatureToggles() {
+        let env = ClaudeEnvironment.builder
+            .disableTelemetry()
+            .disableErrorReporting()
+            .disableAutoUpdater()
+            .disablePromptCaching()
+            .build()
+
+        let vars = env.buildEnvironment()
+
+        #expect(vars["DISABLE_TELEMETRY"] == "1")
+        #expect(vars["DISABLE_ERROR_REPORTING"] == "1")
+        #expect(vars["DISABLE_AUTOUPDATER"] == "1")
+        #expect(vars["DISABLE_PROMPT_CACHING"] == "1")
+    }
+
+    @Test("Authentication configuration")
+    func testAuthenticationConfiguration() {
+        let env = ClaudeEnvironment.builder
+            .apiKey("test-api-key")
+            .authToken("test-auth-token")
+            .customHeaders("{\"X-Custom\": \"value\"}")
+            .build()
+
+        let vars = env.buildEnvironment()
+
+        #expect(vars["ANTHROPIC_API_KEY"] == "test-api-key")
+        #expect(vars["ANTHROPIC_AUTH_TOKEN"] == "test-auth-token")
+        #expect(vars["ANTHROPIC_CUSTOM_HEADERS"] == "{\"X-Custom\": \"value\"}")
+    }
+
+    @Test("Extended thinking configuration")
+    func testExtendedThinking() {
+        let env = ClaudeEnvironment.builder
+            .maxThinkingTokens(20000)
+            .build()
+
+        let vars = env.buildEnvironment()
+
+        #expect(vars["MAX_THINKING_TOKENS"] == "20000")
+    }
+
+    @Test("Empty environment builds no variables")
+    func testEmptyEnvironment() {
+        let env = ClaudeEnvironment()
+        let vars = env.buildEnvironment()
+
+        #expect(vars.isEmpty)
+    }
+}
+
 // Note: Integration tests that actually execute the claude CLI would go here
 // but are commented out since they require the CLI to be installed and configured
 
